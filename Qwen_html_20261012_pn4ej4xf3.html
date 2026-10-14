@@ -1,0 +1,1448 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TRY OUT TKA SD - KKG Kecamatan Gunem</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  * { font-family: 'Nunito', sans-serif; }
+  body { background: linear-gradient(135deg, #dbeafe 0%, #eff6ff 100%); min-height: 100vh; }
+  .view { display: none; }
+  .view.active { display: block; animation: fadeIn 0.4s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  .btn-primary { background: linear-gradient(135deg, #3b82f6, #1e40af); color: white; }
+  .btn-primary:hover { background: linear-gradient(135deg, #2563eb, #1e3a8a); transform: translateY(-2px); }
+  .btn-primary:active { transform: translateY(0); }
+  .card-hover { transition: all 0.3s; }
+  .card-hover:hover { transform: translateY(-4px); box-shadow: 0 10px 25px rgba(59,130,246,0.2); }
+  .soal-nav-btn { width: 40px; height: 40px; border-radius: 8px; font-weight: 700; transition: all 0.2s; }
+  .soal-nav-btn.dijawab { background: #10b981; color: white; }
+  .soal-nav-btn.aktif { background: #f59e0b; color: white; box-shadow: 0 0 0 3px #fbbf24; transform: scale(1.1); }
+  .soal-nav-btn.belum { background: #e5e7eb; color: #6b7280; }
+  .timer-pulse { animation: pulse 1s infinite; }
+  @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+  .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 50; align-items: center; justify-content: center; padding: 1rem; }
+  .modal.active { display: flex; }
+  .tabel-bs { border-collapse: collapse; width: 100%; }
+  .tabel-bs th, .tabel-bs td { border: 1px solid #cbd5e1; padding: 8px; }
+  .tabel-bs th { background: #dbeafe; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; }
+  .toast { position: fixed; top: 20px; right: 20px; z-index: 100; padding: 12px 20px; border-radius: 12px; color: white; font-weight: 600; animation: slideIn 0.3s ease; }
+  @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+  .toast.success { background: #10b981; }
+  .toast.error { background: #ef4444; }
+  .toast.info { background: #3b82f6; }
+  input:focus, select:focus, textarea:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+  .password-wrapper { position: relative; }
+  .toggle-pass { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; background: none; border: none; font-size: 1.2rem; }
+  .skor-positif { color: #10b981; font-weight: 700; }
+  .skor-negatif { color: #ef4444; font-weight: 700; }
+  .skor-nol { color: #6b7280; font-weight: 700; }
+  
+  /* ============ STYLE GAMBAR ============ */
+  .img-upload-area {
+    border: 2px dashed #93c5fd;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    background: #eff6ff;
+  }
+  .img-upload-area:hover {
+    border-color: #3b82f6;
+    background: #dbeafe;
+  }
+  .img-upload-area.has-image {
+    border-style: solid;
+    border-color: #10b981;
+    background: #f0fdf4;
+  }
+  .img-preview {
+    max-width: 100%;
+    max-height: 200px;
+    border-radius: 8px;
+    margin-top: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+  .img-soal {
+    max-width: 100%;
+    max-height: 400px;
+    border-radius: 12px;
+    margin: 10px 0;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+  .img-opsi {
+    max-width: 150px;
+    max-height: 150px;
+    border-radius: 8px;
+    margin-top: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  }
+  .img-thumbnail {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid #e5e7eb;
+  }
+  .btn-hapus-img {
+    background: #ef4444;
+    color: white;
+    border: none;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    margin-top: 5px;
+  }
+  .btn-hapus-img:hover { background: #dc2626; }
+  .file-input-hidden { display: none; }
+</style>
+</head>
+<body>
+
+<!-- ============ HEADER ============ -->
+<header class="bg-gradient-to-r from-blue-700 to-blue-900 text-white shadow-lg sticky top-0 z-40">
+  <div class="container mx-auto px-4 py-4 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="bg-yellow-400 rounded-full w-12 h-12 flex items-center justify-center text-2xl shadow-lg">📚</div>
+      <div>
+        <h1 class="font-extrabold text-lg md:text-xl leading-tight">TRY OUT TKA SD</h1>
+        <p class="text-xs md:text-sm text-blue-100">KKG Kecamatan Gunem</p>
+      </div>
+    </div>
+    <div class="flex gap-2">
+      <button id="btnGantiPassword" class="hidden bg-yellow-500 hover:bg-yellow-600 px-3 py-2 rounded-lg font-semibold text-sm transition"> Ganti Password</button>
+      <button id="btnLogout" class="hidden bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg font-semibold text-sm transition"> Keluar</button>
+    </div>
+  </div>
+</header>
+
+<main class="container mx-auto px-4 py-6 max-w-6xl">
+
+<!-- ============ VIEW: LOGIN ============ -->
+<div id="viewLogin" class="view active">
+  <div class="max-w-md mx-auto mt-8">
+    <div class="bg-white rounded-2xl shadow-xl p-8">
+      <div class="text-center mb-6">
+        <div class="text-6xl mb-3">🎒</div>
+        <h2 class="text-2xl font-extrabold text-blue-800">Selamat Datang!</h2>
+        <p class="text-gray-500 text-sm">Silakan login untuk mulai Try Out</p>
+      </div>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1">Username / NISN</label>
+          <input id="loginUser" type="text" class="w-full px-4 py-3 border-2 border-blue-200 rounded-xl" placeholder="Masukkan NISN">
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1">Password</label>
+          <input id="loginPass" type="password" class="w-full px-4 py-3 border-2 border-blue-200 rounded-xl" placeholder="Masukkan password">
+        </div>
+        <button onclick="doLogin()" class="btn-primary w-full py-3 rounded-xl font-bold text-lg shadow-lg transition">🚀 Masuk</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ VIEW: DASHBOARD SISWA ============ -->
+<div id="viewDashboard" class="view">
+  <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
+    <div class="flex items-center gap-4 flex-wrap">
+      <div class="bg-blue-100 rounded-full w-16 h-16 flex items-center justify-center text-3xl"></div>
+      <div>
+        <h2 class="text-2xl font-extrabold text-blue-800">Halo, <span id="sapaNama">Siswa</span>!</h2>
+        <p class="text-gray-600"><span id="sapaSekolah">SD</span> • Kelas <span id="sapaKelas">-</span></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid md:grid-cols-2 gap-6">
+    <div class="bg-white rounded-2xl shadow-lg p-6 card-hover">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="bg-red-100 rounded-full w-12 h-12 flex items-center justify-center text-2xl">📖</div>
+        <h3 class="text-xl font-extrabold text-blue-800">Bahasa Indonesia</h3>
+      </div>
+      <div id="listBI" class="space-y-2"></div>
+    </div>
+    <div class="bg-white rounded-2xl shadow-lg p-6 card-hover">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="bg-green-100 rounded-full w-12 h-12 flex items-center justify-center text-2xl">🔢</div>
+        <h3 class="text-xl font-extrabold text-blue-800">Matematika</h3>
+      </div>
+      <div id="listMTK" class="space-y-2"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ VIEW: QUIZ ============ -->
+<div id="viewQuiz" class="view">
+  <div class="bg-white rounded-2xl shadow-lg p-4 mb-4 flex items-center justify-between flex-wrap gap-2 sticky top-20 z-30">
+    <div>
+      <h3 id="quizTitle" class="font-extrabold text-blue-800 text-lg">Try Out</h3>
+      <p id="quizSub" class="text-xs text-gray-500">Paket Try Out</p>
+    </div>
+    <div id="timerBox" class="bg-red-100 text-red-700 px-4 py-2 rounded-xl font-bold timer-pulse">
+      ⏱ <span id="timerText">00:00</span>
+    </div>
+  </div>
+
+  <div class="grid lg:grid-cols-4 gap-4">
+    <div class="lg:col-span-3 bg-white rounded-2xl shadow-lg p-6">
+      <div id="soalContainer"></div>
+      <div class="flex justify-between mt-6 gap-2">
+        <button onclick="prevSoal()" class="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-lg font-semibold transition">← Sebelumnya</button>
+        <button onclick="nextSoal()" class="btn-primary px-4 py-2 rounded-lg font-semibold transition">Selanjutnya →</button>
+      </div>
+    </div>
+    <div class="bg-white rounded-2xl shadow-lg p-4">
+      <h4 class="font-bold text-blue-800 mb-3">📋 Nomor Soal</h4>
+      <div id="soalNav" class="grid grid-cols-5 gap-2"></div>
+      <button onclick="confirmSubmit()" class="btn-primary w-full mt-4 py-3 rounded-xl font-bold transition">✅ Selesai</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ VIEW: HASIL ============ -->
+<div id="viewHasil" class="view">
+  <div class="bg-white rounded-2xl shadow-lg p-6 text-center">
+    <div class="text-6xl mb-3"></div>
+    <h2 class="text-2xl font-extrabold text-blue-800">Try Out Selesai!</h2>
+    <div class="my-6">
+      <div class="inline-block bg-gradient-to-br from-blue-500 to-blue-700 text-white rounded-2xl px-8 py-6 shadow-xl">
+        <p class="text-sm opacity-80">Skor Kamu</p>
+        <p class="text-5xl font-extrabold" id="hasilSkor">0</p>
+        <p class="text-sm opacity-80">dari maksimal <span id="hasilMaks">0</span></p>
+      </div>
+    </div>
+    <div id="hasilDetail" class="text-left bg-blue-50 rounded-xl p-4 mb-4"></div>
+    <button onclick="backToDashboard()" class="btn-primary px-6 py-3 rounded-xl font-bold transition">🏠 Kembali ke Dashboard</button>
+  </div>
+</div>
+
+<!-- ============ VIEW: ADMIN ============ -->
+<div id="viewAdmin" class="view">
+  <div class="bg-white rounded-2xl shadow-lg p-4 mb-4">
+    <div class="flex gap-2 flex-wrap">
+      <button onclick="showAdminTab('dashboard')" class="admin-tab bg-blue-500 text-white px-4 py-2 rounded-lg font-semibold transition">📊 Dashboard</button>
+      <button onclick="showAdminTab('users')" class="admin-tab bg-gray-200 px-4 py-2 rounded-lg font-semibold transition">👥 User</button>
+      <button onclick="showAdminTab('soal')" class="admin-tab bg-gray-200 px-4 py-2 rounded-lg font-semibold transition">📝 Soal</button>
+      <button onclick="showAdminTab('hasil')" class="admin-tab bg-gray-200 px-4 py-2 rounded-lg font-semibold transition">🏆 Hasil Siswa</button>
+    </div>
+  </div>
+
+  <div id="adminDashboard" class="admin-content">
+    <div class="grid md:grid-cols-3 gap-4">
+      <div class="bg-gradient-to-br from-blue-500 to-blue-700 text-white rounded-2xl p-6 shadow-lg">
+        <p class="text-sm opacity-80">Total Siswa</p>
+        <p id="statUser" class="text-4xl font-extrabold">0</p>
+      </div>
+      <div class="bg-gradient-to-br from-green-500 to-green-700 text-white rounded-2xl p-6 shadow-lg">
+        <p class="text-sm opacity-80">Total Soal</p>
+        <p id="statSoal" class="text-4xl font-extrabold">0</p>
+      </div>
+      <div class="bg-gradient-to-br from-yellow-500 to-orange-600 text-white rounded-2xl p-6 shadow-lg">
+        <p class="text-sm opacity-80">Total Pengerjaan</p>
+        <p id="statHasil" class="text-4xl font-extrabold">0</p>
+      </div>
+    </div>
+    
+    <div class="mt-6 bg-gradient-to-br from-purple-500 to-pink-600 text-white rounded-2xl p-6 shadow-lg card-hover cursor-pointer" onclick="openGantiPasswordModal()">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm opacity-80">Keamanan Akun</p>
+          <p class="text-2xl font-extrabold">🔑 Ganti Password Admin</p>
+          <p class="text-xs opacity-80 mt-1">Klik untuk mengubah password akun admin</p>
+        </div>
+        <div class="text-5xl">🛡️</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="adminUsers" class="admin-content hidden">
+    <div class="bg-white rounded-2xl shadow-lg p-6">
+      <div class="flex justify-between items-center mb-4 flex-wrap gap-2">
+        <h3 class="text-xl font-extrabold text-blue-800">Manajemen User</h3>
+        <button onclick="openUserModal()" class="btn-primary px-4 py-2 rounded-lg font-semibold transition">+ Tambah User</button>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="bg-blue-50">
+            <tr><th class="p-2 text-left">NISN</th><th class="p-2 text-left">Nama</th><th class="p-2 text-left">Sekolah</th><th class="p-2 text-left">Kelas</th><th class="p-2 text-left">Aksi</th></tr>
+          </thead>
+          <tbody id="userTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div id="adminSoal" class="admin-content hidden">
+    <div class="bg-white rounded-2xl shadow-lg p-6">
+      <div class="flex justify-between items-center mb-4 flex-wrap gap-2">
+        <h3 class="text-xl font-extrabold text-blue-800">Bank Soal</h3>
+        <div class="flex gap-2 flex-wrap">
+          <select id="filterKat" onchange="loadSoalAdmin()" class="border-2 border-blue-200 rounded-lg px-3 py-2">
+            <option value="">Semua Kategori</option>
+            <option value="Bahasa Indonesia">Bahasa Indonesia</option>
+            <option value="Matematika">Matematika</option>
+          </select>
+          <select id="filterPaket" onchange="loadSoalAdmin()" class="border-2 border-blue-200 rounded-lg px-3 py-2">
+            <option value="">Semua Paket</option>
+            <option>Try Out 1</option><option>Try Out 2</option><option>Try Out 3</option>
+            <option>Try Out 4</option><option>Try Out 5</option>
+          </select>
+          <button onclick="openSoalModal()" class="btn-primary px-4 py-2 rounded-lg font-semibold transition">+ Tambah Soal</button>
+        </div>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="bg-blue-50">
+            <tr><th class="p-2 text-left">#</th><th class="p-2 text-left">Kategori</th><th class="p-2 text-left">Paket</th><th class="p-2 text-left">Tipe</th><th class="p-2 text-left">Pertanyaan</th><th class="p-2 text-left">🖼️</th><th class="p-2 text-left">Skor</th><th class="p-2 text-left">Aksi</th></tr>
+          </thead>
+          <tbody id="soalTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div id="adminHasil" class="admin-content hidden">
+    <div class="bg-white rounded-2xl shadow-lg p-6">
+      <h3 class="text-xl font-extrabold text-blue-800 mb-4">🏆 Hasil Try Out Siswa</h3>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="bg-blue-50">
+            <tr><th class="p-2 text-left">Waktu</th><th class="p-2 text-left">NISN</th><th class="p-2 text-left">Nama</th><th class="p-2 text-left">Kategori</th><th class="p-2 text-left">Paket</th><th class="p-2 text-left">Skor</th><th class="p-2 text-left">Detail</th></tr>
+          </thead>
+          <tbody id="hasilTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<!-- ============ MODAL USER ============ -->
+<div id="modalUser" class="modal">
+  <div class="bg-white rounded-2xl p-6 max-w-md w-full">
+    <h3 class="text-xl font-extrabold text-blue-800 mb-4" id="userModalTitle">Tambah User</h3>
+    <div class="space-y-3">
+      <input id="uNisn" type="text" placeholder="NISN / Username" class="w-full px-3 py-2 border-2 border-blue-200 rounded-lg">
+      <input id="uPass" type="text" placeholder="Password" class="w-full px-3 py-2 border-2 border-blue-200 rounded-lg">
+      <input id="uNama" type="text" placeholder="Nama Lengkap" class="w-full px-3 py-2 border-2 border-blue-200 rounded-lg">
+      <input id="uSekolah" type="text" placeholder="Nama Sekolah" class="w-full px-3 py-2 border-2 border-blue-200 rounded-lg">
+      <input id="uKelas" type="text" placeholder="Kelas (misal: 6A)" class="w-full px-3 py-2 border-2 border-blue-200 rounded-lg">
+    </div>
+    <div class="flex gap-2 mt-4">
+      <button onclick="closeModal('modalUser')" class="flex-1 bg-gray-200 hover:bg-gray-300 py-2 rounded-lg font-semibold transition">Batal</button>
+      <button onclick="saveUser()" class="flex-1 btn-primary py-2 rounded-lg font-semibold transition">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MODAL SOAL (DENGAN GAMBAR) ============ -->
+<div id="modalSoal" class="modal">
+  <div class="bg-white rounded-2xl p-6 max-w-3xl w-full max-h-[95vh] overflow-y-auto">
+    <h3 class="text-xl font-extrabold text-blue-800 mb-4" id="soalModalTitle">Tambah Soal</h3>
+    <div class="space-y-3">
+      <div class="grid md:grid-cols-2 gap-3">
+        <select id="sKategori" class="border-2 border-blue-200 rounded-lg px-3 py-2">
+          <option>Bahasa Indonesia</option><option>Matematika</option>
+        </select>
+        <select id="sPaket" class="border-2 border-blue-200 rounded-lg px-3 py-2">
+          <option>Try Out 1</option><option>Try Out 2</option><option>Try Out 3</option>
+          <option>Try Out 4</option><option>Try Out 5</option>
+        </select>
+      </div>
+      <select id="sTipe" onchange="toggleSoalForm()" class="w-full border-2 border-blue-200 rounded-lg px-3 py-2">
+        <option value="pg">Pilihan Ganda Biasa</option>
+        <option value="pg_kompleks">Pilihan Ganda Kompleks (2 jawaban)</option>
+        <option value="pg_kategori">PG Kategori (Benar/Salah)</option>
+      </select>
+      
+      <!-- GAMBAR PERTANYAAN -->
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-1">🖼️ Gambar Pertanyaan (opsional)</label>
+        <div class="img-upload-area" id="uploadAreaPertanyaan" onclick="document.getElementById('filePertanyaan').click()">
+          <div id="previewPertanyaan">
+            <div class="text-4xl mb-2">📷</div>
+            <p class="text-sm text-gray-600">Klik untuk upload gambar pertanyaan</p>
+            <p class="text-xs text-gray-500 mt-1">Format: JPG, PNG, GIF (Maks 2MB, auto-compress)</p>
+          </div>
+        </div>
+        <input type="file" id="filePertanyaan" class="file-input-hidden" accept="image/*" onchange="handleImageUpload('pertanyaan', this)">
+      </div>
+      
+      <textarea id="sPertanyaan" rows="3" placeholder="Pertanyaan (teks)" class="w-full px-3 py-2 border-2 border-blue-200 rounded-lg"></textarea>
+      
+      <div id="formPG">
+        <!-- OPSI A -->
+        <div class="bg-gray-50 p-3 rounded-lg">
+          <div class="flex gap-2">
+            <input id="sA" placeholder="Opsi A (teks)" class="flex-1 px-3 py-2 border-2 border-blue-200 rounded-lg">
+            <button type="button" onclick="document.getElementById('fileA').click()" class="bg-blue-100 hover:bg-blue-200 px-3 py-2 rounded-lg text-sm transition">️</button>
+          </div>
+          <input type="file" id="fileA" class="file-input-hidden" accept="image/*" onchange="handleImageUpload('A', this)">
+          <div id="previewA" class="hidden mt-2">
+            <img class="img-opsi" id="imgPreviewA">
+            <button type="button" onclick="hapusGambarOpsi('A')" class="btn-hapus-img">🗑️ Hapus</button>
+          </div>
+        </div>
+        
+        <!-- OPSI B -->
+        <div class="bg-gray-50 p-3 rounded-lg">
+          <div class="flex gap-2">
+            <input id="sB" placeholder="Opsi B (teks)" class="flex-1 px-3 py-2 border-2 border-blue-200 rounded-lg">
+            <button type="button" onclick="document.getElementById('fileB').click()" class="bg-blue-100 hover:bg-blue-200 px-3 py-2 rounded-lg text-sm transition">🖼️</button>
+          </div>
+          <input type="file" id="fileB" class="file-input-hidden" accept="image/*" onchange="handleImageUpload('B', this)">
+          <div id="previewB" class="hidden mt-2">
+            <img class="img-opsi" id="imgPreviewB">
+            <button type="button" onclick="hapusGambarOpsi('B')" class="btn-hapus-img">🗑️ Hapus</button>
+          </div>
+        </div>
+        
+        <!-- OPSI C -->
+        <div class="bg-gray-50 p-3 rounded-lg">
+          <div class="flex gap-2">
+            <input id="sC" placeholder="Opsi C (teks)" class="flex-1 px-3 py-2 border-2 border-blue-200 rounded-lg">
+            <button type="button" onclick="document.getElementById('fileC').click()" class="bg-blue-100 hover:bg-blue-200 px-3 py-2 rounded-lg text-sm transition">🖼️</button>
+          </div>
+          <input type="file" id="fileC" class="file-input-hidden" accept="image/*" onchange="handleImageUpload('C', this)">
+          <div id="previewC" class="hidden mt-2">
+            <img class="img-opsi" id="imgPreviewC">
+            <button type="button" onclick="hapusGambarOpsi('C')" class="btn-hapus-img">🗑️ Hapus</button>
+          </div>
+        </div>
+        
+        <!-- OPSI D -->
+        <div class="bg-gray-50 p-3 rounded-lg">
+          <div class="flex gap-2">
+            <input id="sD" placeholder="Opsi D (teks)" class="flex-1 px-3 py-2 border-2 border-blue-200 rounded-lg">
+            <button type="button" onclick="document.getElementById('fileD').click()" class="bg-blue-100 hover:bg-blue-200 px-3 py-2 rounded-lg text-sm transition">🖼️</button>
+          </div>
+          <input type="file" id="fileD" class="file-input-hidden" accept="image/*" onchange="handleImageUpload('D', this)">
+          <div id="previewD" class="hidden mt-2">
+            <img class="img-opsi" id="imgPreviewD">
+            <button type="button" onclick="hapusGambarOpsi('D')" class="btn-hapus-img">🗑️ Hapus</button>
+          </div>
+        </div>
+        
+        <input id="sJawaban" placeholder="Jawaban Benar (PG: A/B/C/D, Kompleks: A,B)" class="w-full px-3 py-2 border-2 border-blue-200 rounded-lg">
+      </div>
+      
+      <div id="formKategori" class="hidden">
+        <p class="text-sm text-gray-600 mb-2">Pernyataan (satu per baris, format: pernyataan|B/S)</p>
+        <textarea id="sPernyataan" rows="6" placeholder="Contoh:&#10;Ibukota Indonesia adalah Jakarta|B&#10;5 + 3 = 9|S" class="w-full px-3 py-2 border-2 border-blue-200 rounded-lg"></textarea>
+      </div>
+      
+      <div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 rounded">
+        <p class="text-xs text-yellow-800">💡 <b>Sistem Skor +1/-1:</b></p>
+        <ul class="text-xs text-yellow-800 mt-1 list-disc list-inside">
+          <li><b>PG Biasa:</b> Benar = skor soal, Salah = 0</li>
+          <li><b>PG Kompleks:</b> Setiap opsi benar = <b>+1</b>, salah = <b>-1</b> (pilih 2)</li>
+          <li><b>PG Kategori:</b> Setiap pernyataan benar = <b>+1</b>, salah = <b>-1</b></li>
+        </ul>
+      </div>
+      
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-1">Bobot Skor</label>
+        <input id="sSkor" type="number" value="2" min="1" class="w-full px-3 py-2 border-2 border-blue-200 rounded-lg">
+      </div>
+    </div>
+    <div class="flex gap-2 mt-4">
+      <button onclick="closeModal('modalSoal')" class="flex-1 bg-gray-200 hover:bg-gray-300 py-2 rounded-lg font-semibold transition">Batal</button>
+      <button onclick="saveSoal()" class="flex-1 btn-primary py-2 rounded-lg font-semibold transition">💾 Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MODAL CONFIRM ============ -->
+<div id="modalConfirm" class="modal">
+  <div class="bg-white rounded-2xl p-6 max-w-md w-full text-center">
+    <div class="text-5xl mb-3">🤔</div>
+    <h3 class="text-xl font-extrabold text-blue-800 mb-2">Yakin Selesai?</h3>
+    <p id="confirmMsg" class="text-gray-600 mb-4"></p>
+    <div class="flex gap-2">
+      <button onclick="closeModal('modalConfirm')" class="flex-1 bg-gray-200 hover:bg-gray-300 py-2 rounded-lg font-semibold transition">Kembali</button>
+      <button onclick="submitQuiz()" class="flex-1 btn-primary py-2 rounded-lg font-semibold transition">Ya, Kirim!</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MODAL DETAIL HASIL ============ -->
+<div id="modalDetailHasil" class="modal">
+  <div class="bg-white rounded-2xl p-6 max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+    <h3 class="text-xl font-extrabold text-blue-800 mb-4">Detail Jawaban Siswa</h3>
+    <div id="detailHasilContent"></div>
+    <button onclick="closeModal('modalDetailHasil')" class="w-full btn-primary py-2 rounded-lg font-semibold mt-4 transition">Tutup</button>
+  </div>
+</div>
+
+<!-- ============ MODAL GANTI PASSWORD ============ -->
+<div id="modalGantiPassword" class="modal">
+  <div class="bg-white rounded-2xl p-6 max-w-md w-full">
+    <div class="text-center mb-4">
+      <div class="text-5xl mb-2">🔐</div>
+      <h3 class="text-xl font-extrabold text-blue-800">Ganti Password Admin</h3>
+    </div>
+    <div class="space-y-3">
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-1">🔑 Password Lama</label>
+        <div class="password-wrapper">
+          <input id="gpOld" type="password" class="w-full px-3 py-2 border-2 border-blue-200 rounded-lg">
+          <button type="button" onclick="togglePass('gpOld', this)" class="toggle-pass">️</button>
+        </div>
+      </div>
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-1">🆕 Password Baru</label>
+        <div class="password-wrapper">
+          <input id="gpNew" type="password" class="w-full px-3 py-2 border-2 border-blue-200 rounded-lg">
+          <button type="button" onclick="togglePass('gpNew', this)" class="toggle-pass">👁️</button>
+        </div>
+      </div>
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-1">✅ Konfirmasi</label>
+        <div class="password-wrapper">
+          <input id="gpConfirm" type="password" class="w-full px-3 py-2 border-2 border-blue-200 rounded-lg">
+          <button type="button" onclick="togglePass('gpConfirm', this)" class="toggle-pass">👁️</button>
+        </div>
+      </div>
+    </div>
+    <div class="flex gap-2 mt-4">
+      <button onclick="closeModal('modalGantiPassword')" class="flex-1 bg-gray-200 hover:bg-gray-300 py-2 rounded-lg font-semibold transition">Batal</button>
+      <button onclick="gantiPassword()" class="flex-1 btn-primary py-2 rounded-lg font-semibold transition">💾 Simpan</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============ KONFIGURASI ============
+const DURASI_MENIT = 60;
+const ADMIN_PASS_DEFAULT = 'admin123';
+const MAX_IMAGE_SIZE = 2 * 1024 * 1024; // 2MB
+const IMG_QUALITY = 0.7;
+const MAX_WIDTH_PERTANYAAN = 800;
+const MAX_WIDTH_OPSI = 400;
+
+// ============ DATABASE LAYER ============
+const DB = {
+  get(key) {
+    const data = localStorage.getItem('tryout_' + key);
+    return data ? JSON.parse(data) : null;
+  },
+  set(key, value) {
+    try {
+      localStorage.setItem('tryout_' + key, JSON.stringify(value));
+      return true;
+    } catch(e) {
+      if (e.name === 'QuotaExceededError') {
+        showToast('⚠️ Penyimpanan penuh! Hapus beberapa soal/gambar.', 'error');
+      }
+      return false;
+    }
+  },
+  init() {
+    if (!this.get('initialized')) {
+      this.set('users', [
+        { nisn: 'admin', password: ADMIN_PASS_DEFAULT, nama: 'Administrator', sekolah: '-', kelas: '-', role: 'admin' }
+      ]);
+      this.set('soal', [
+        { id: 'SOAL_1', kategori: 'Bahasa Indonesia', paket: 'Try Out 1', tipe: 'pg', pertanyaan: 'Apa sinonim dari kata "besar"?', opsiA: 'Kecil', opsiB: 'Raksasa', opsiC: 'Sedang', opsiD: 'Tipis', jawaban: 'B', skor: 1, pernyataan: [], gambarPertanyaan: '', gambarA: '', gambarB: '', gambarC: '', gambarD: '' },
+        { id: 'SOAL_2', kategori: 'Bahasa Indonesia', paket: 'Try Out 1', tipe: 'pg_kompleks', pertanyaan: 'Manakah yang termasuk kata sifat? (Pilih 2)', opsiA: 'Cantik', opsiB: 'Berlari', opsiC: 'Tinggi', opsiD: 'Makan', jawaban: 'A,C', skor: 2, pernyataan: [], gambarPertanyaan: '', gambarA: '', gambarB: '', gambarC: '', gambarD: '' },
+        { id: 'SOAL_3', kategori: 'Bahasa Indonesia', paket: 'Try Out 1', tipe: 'pg_kategori', pertanyaan: 'Tentukan benar/salah:', opsiA: '', opsiB: '', opsiC: '', opsiD: '', jawaban: '', skor: 3, pernyataan: [{text: 'Kata "berlari" adalah kata kerja', answer: 'B'}, {text: 'Kata "cantik" adalah kata benda', answer: 'S'}, {text: 'Antonim dari "panas" adalah "dingin"', answer: 'B'}], gambarPertanyaan: '', gambarA: '', gambarB: '', gambarC: '', gambarD: '' },
+        { id: 'SOAL_4', kategori: 'Matematika', paket: 'Try Out 1', tipe: 'pg', pertanyaan: 'Berapa hasil dari 15 + 27?', opsiA: '40', opsiB: '42', opsiC: '43', opsiD: '45', jawaban: 'B', skor: 1, pernyataan: [], gambarPertanyaan: '', gambarA: '', gambarB: '', gambarC: '', gambarD: '' },
+        { id: 'SOAL_5', kategori: 'Matematika', paket: 'Try Out 1', tipe: 'pg_kompleks', pertanyaan: 'Manakah bilangan genap? (Pilih 2)', opsiA: '12', opsiB: '15', opsiC: '18', opsiD: '21', jawaban: 'A,C', skor: 2, pernyataan: [], gambarPertanyaan: '', gambarA: '', gambarB: '', gambarC: '', gambarD: '' }
+      ]);
+      this.set('hasil', []);
+      this.set('initialized', true);
+    }
+  }
+};
+
+DB.init();
+
+// ============ STATE ============
+let currentUser = null;
+let currentQuiz = null;
+let currentSoalIndex = 0;
+let jawabanSiswa = {};
+let timerInterval = null;
+let waktuSisa = 0;
+let editingSoalId = null;
+let gambarSoal = { pertanyaan: '', A: '', B: '', C: '', D: '' };
+
+// ============ UTILITIES ============
+function showView(id) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function showToast(msg, type = 'info') {
+  const toast = document.createElement('div');
+  toast.className = 'toast ' + type;
+  toast.textContent = msg;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 3000);
+}
+
+function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+function formatSkor(skor) {
+  if (skor > 0) return '<span class="skor-positif">+' + skor + '</span>';
+  if (skor < 0) return '<span class="skor-negatif">' + skor + '</span>';
+  return '<span class="skor-nol">0</span>';
+}
+
+// ============ 🖼️ FUNGSI UPLOAD & KOMPRESI GAMBAR ============
+function compressImage(file, maxWidth, callback) {
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const img = new Image();
+    img.onload = function() {
+      const canvas = document.createElement('canvas');
+      let width = img.width;
+      let height = img.height;
+      
+      if (width > maxWidth) {
+        height = (height * maxWidth) / width;
+        width = maxWidth;
+      }
+      
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+      
+      const compressed = canvas.toDataURL('image/jpeg', IMG_QUALITY);
+      callback(compressed);
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function handleImageUpload(target, input) {
+  const file = input.files[0];
+  if (!file) return;
+  
+  // Validasi tipe file
+  if (!file.type.startsWith('image/')) {
+    showToast('File harus berupa gambar!', 'error');
+    return;
+  }
+  
+  // Validasi ukuran (sebelum compress)
+  if (file.size > MAX_IMAGE_SIZE * 3) {
+    showToast('Ukuran file terlalu besar! Maksimal 6MB sebelum compress.', 'error');
+    return;
+  }
+  
+  showToast('🔄 Mengompresi gambar...', 'info');
+  
+  const maxWidth = target === 'pertanyaan' ? MAX_WIDTH_PERTANYAAN : MAX_WIDTH_OPSI;
+  
+  compressImage(file, maxWidth, function(base64) {
+    gambarSoal[target] = base64;
+    
+    if (target === 'pertanyaan') {
+      const preview = document.getElementById('previewPertanyaan');
+      preview.innerHTML = `
+        <img src="${base64}" class="img-preview">
+        <button type="button" onclick="hapusGambarPertanyaan(event)" class="btn-hapus-img mt-2">🗑️ Hapus Gambar</button>
+      `;
+      document.getElementById('uploadAreaPertanyaan').classList.add('has-image');
+    } else {
+      const previewDiv = document.getElementById('preview' + target);
+      const imgPreview = document.getElementById('imgPreview' + target);
+      imgPreview.src = base64;
+      previewDiv.classList.remove('hidden');
+    }
+    
+    showToast('✅ Gambar berhasil diupload!', 'success');
+  });
+}
+
+function hapusGambarPertanyaan(e) {
+  if (e) e.stopPropagation();
+  gambarSoal.pertanyaan = '';
+  const preview = document.getElementById('previewPertanyaan');
+  preview.innerHTML = `
+    <div class="text-4xl mb-2">📷</div>
+    <p class="text-sm text-gray-600">Klik untuk upload gambar pertanyaan</p>
+    <p class="text-xs text-gray-500 mt-1">Format: JPG, PNG, GIF (Maks 2MB, auto-compress)</p>
+  `;
+  document.getElementById('uploadAreaPertanyaan').classList.remove('has-image');
+  document.getElementById('filePertanyaan').value = '';
+}
+
+function hapusGambarOpsi(opt) {
+  gambarSoal[opt] = '';
+  const previewDiv = document.getElementById('preview' + opt);
+  previewDiv.classList.add('hidden');
+  document.getElementById('file' + opt).value = '';
+}
+
+// ============ FITUR GANTI PASSWORD ============
+function openGantiPasswordModal() {
+  document.getElementById('gpOld').value = '';
+  document.getElementById('gpNew').value = '';
+  document.getElementById('gpConfirm').value = '';
+  document.getElementById('modalGantiPassword').classList.add('active');
+}
+
+function togglePass(inputId, btn) {
+  const input = document.getElementById(inputId);
+  if (input.type === 'password') {
+    input.type = 'text';
+    btn.textContent = '🙈';
+  } else {
+    input.type = 'password';
+    btn.textContent = '👁️';
+  }
+}
+
+function gantiPassword() {
+  const oldPass = document.getElementById('gpOld').value;
+  const newPass = document.getElementById('gpNew').value;
+  const confirmPass = document.getElementById('gpConfirm').value;
+  
+  if (!oldPass || !newPass || !confirmPass) { showToast('Semua field harus diisi!', 'error'); return; }
+  if (oldPass !== currentUser.password) { showToast('Password lama salah!', 'error'); return; }
+  if (newPass.length < 4) { showToast('Password baru minimal 4 karakter!', 'error'); return; }
+  if (newPass !== confirmPass) { showToast('Konfirmasi password tidak cocok!', 'error'); return; }
+  if (newPass === oldPass) { showToast('Password baru harus berbeda!', 'error'); return; }
+  
+  const users = DB.get('users') || [];
+  const idx = users.findIndex(u => u.nisn === currentUser.nisn);
+  if (idx >= 0) {
+    users[idx].password = newPass;
+    DB.set('users', users);
+    currentUser.password = newPass;
+    closeModal('modalGantiPassword');
+    showToast('✅ Password berhasil diganti!', 'success');
+  }
+}
+
+// ============ LOGIN ============
+function doLogin() {
+  const u = document.getElementById('loginUser').value.trim();
+  const p = document.getElementById('loginPass').value.trim();
+  if (!u || !p) { showToast('Isi username dan password!', 'error'); return; }
+  
+  const users = DB.get('users') || [];
+  const user = users.find(x => x.nisn === u && x.password === p);
+  
+  if (!user) { showToast('Username atau password salah!', 'error'); return; }
+  
+  currentUser = user;
+  document.getElementById('btnLogout').classList.remove('hidden');
+  
+  if (user.role === 'admin') {
+    document.getElementById('btnGantiPassword').classList.remove('hidden');
+    showView('viewAdmin');
+    loadAdminDashboard();
+  } else {
+    document.getElementById('btnGantiPassword').classList.add('hidden');
+    document.getElementById('sapaNama').textContent = user.nama;
+    document.getElementById('sapaSekolah').textContent = user.sekolah;
+    document.getElementById('sapaKelas').textContent = user.kelas;
+    showView('viewDashboard');
+    loadDashboard();
+  }
+  showToast('Login berhasil! Selamat datang, ' + user.nama, 'success');
+}
+
+document.getElementById('btnGantiPassword').onclick = openGantiPasswordModal;
+
+document.getElementById('btnLogout').onclick = () => {
+  currentUser = null;
+  document.getElementById('btnLogout').classList.add('hidden');
+  document.getElementById('btnGantiPassword').classList.add('hidden');
+  document.getElementById('loginUser').value = '';
+  document.getElementById('loginPass').value = '';
+  showView('viewLogin');
+  showToast('Anda telah keluar', 'info');
+};
+
+// ============ DASHBOARD SISWA ============
+function loadDashboard() {
+  const hasil = DB.get('hasil') || [];
+  const progress = {};
+  hasil.filter(h => h.nisn === currentUser.nisn).forEach(h => {
+    progress[h.kategori + '_' + h.paket] = { skor: h.skor, bobotMaks: h.bobotMaks };
+  });
+  
+  ['Bahasa Indonesia', 'Matematika'].forEach(kat => {
+    const container = document.getElementById(kat === 'Bahasa Indonesia' ? 'listBI' : 'listMTK');
+    container.innerHTML = '';
+    for (let i = 1; i <= 5; i++) {
+      const paket = 'Try Out ' + i;
+      const key = kat + '_' + paket;
+      const p = progress[key];
+      let status = '<span class="badge bg-gray-200 text-gray-600">⏳ Belum Dikerjakan</span>';
+      if (p) {
+        const skorClass = p.skor >= 0 ? 'text-green-700' : 'text-red-700';
+        status = `<span class="badge bg-green-100 ${skorClass}">✅ Selesai - Skor: ${p.skor}/${p.bobotMaks}</span>`;
+      }
+      
+      container.innerHTML += `
+        <button onclick="startQuiz('${kat}','${paket}')" class="w-full text-left bg-blue-50 hover:bg-blue-100 p-3 rounded-xl flex justify-between items-center transition">
+          <span class="font-semibold text-blue-800">${paket}</span>
+          ${status}
+        </button>`;
+    }
+  });
+}
+
+// ============ QUIZ ============
+function startQuiz(kategori, paket) {
+  const soal = (DB.get('soal') || []).filter(s => s.kategori === kategori && s.paket === paket);
+  if (soal.length === 0) { showToast('Belum ada soal untuk paket ini.', 'error'); return; }
+  
+  currentQuiz = { kategori, paket, soal };
+  currentSoalIndex = 0;
+  jawabanSiswa = {};
+  waktuSisa = DURASI_MENIT * 60;
+  
+  document.getElementById('quizTitle').textContent = kategori;
+  document.getElementById('quizSub').textContent = paket;
+  showView('viewQuiz');
+  renderSoal();
+  renderNav();
+  startTimer();
+}
+
+function startTimer() {
+  clearInterval(timerInterval);
+  updateTimerDisplay();
+  timerInterval = setInterval(() => {
+    waktuSisa--;
+    updateTimerDisplay();
+    if (waktuSisa <= 0) {
+      clearInterval(timerInterval);
+      showToast('Waktu habis! Jawaban dikirim otomatis.', 'error');
+      submitQuiz();
+    }
+  }, 1000);
+}
+
+function updateTimerDisplay() {
+  const m = Math.floor(waktuSisa / 60);
+  const s = waktuSisa % 60;
+  document.getElementById('timerText').textContent = String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+}
+
+function renderSoal() {
+  const soal = currentQuiz.soal[currentSoalIndex];
+  const idx = currentSoalIndex;
+  const container = document.getElementById('soalContainer');
+  const currentJawaban = jawabanSiswa[idx] || null;
+  
+  let html = `<div class="mb-4"><span class="badge bg-blue-100 text-blue-800">Soal ${idx+1} / ${currentQuiz.soal.length}</span>`;
+  
+  if (soal.tipe === 'pg') {
+    html += `<span class="badge bg-yellow-100 text-yellow-800 ml-1">Benar: +${soal.skor} | Salah: 0</span>`;
+  } else if (soal.tipe === 'pg_kompleks') {
+    html += `<span class="badge bg-purple-100 text-purple-800 ml-1">Benar: +1 | Salah: -1 per opsi</span>`;
+  } else if (soal.tipe === 'pg_kategori') {
+    html += `<span class="badge bg-purple-100 text-purple-800 ml-1">Benar: +1 | Salah: -1 per pernyataan</span>`;
+  }
+  html += `</div>`;
+  
+  // GAMBAR PERTANYAAN
+  if (soal.gambarPertanyaan) {
+    html += `<div class="text-center mb-3"><img src="${soal.gambarPertanyaan}" class="img-soal"></div>`;
+  }
+  
+  html += `<p class="text-lg font-semibold text-gray-800 mb-4">${soal.pertanyaan}</p>`;
+  
+  if (soal.tipe === 'pg') {
+    ['A','B','C','D'].forEach(opt => {
+      const val = soal['opsi'+opt];
+      if (!val) return;
+      const checked = currentJawaban === opt ? 'checked' : '';
+      html += `<label class="block bg-gray-50 hover:bg-blue-50 p-3 rounded-lg mb-2 cursor-pointer transition">
+        <input type="radio" name="soal${idx}" value="${opt}" ${checked} onchange="setJawaban(${idx},'${opt}')" class="mr-2"> 
+        <span class="font-bold">${opt}.</span> ${val}
+      </label>`;
+      // GAMBAR OPSI
+      if (soal['gambar'+opt]) {
+        html += `<div class="ml-8 mb-2"><img src="${soal['gambar'+opt]}" class="img-opsi"></div>`;
+      }
+    });
+  } else if (soal.tipe === 'pg_kompleks') {
+    html += `<div class="bg-orange-50 border-l-4 border-orange-400 p-3 rounded mb-3">
+      <p class="text-sm text-orange-800 font-semibold">⚠️ Pilih TEPAT 2 jawaban</p>
+      <p class="text-xs text-orange-700 mt-1">• Setiap opsi <b>benar</b> yang dipilih: <b>+1 poin</b></p>
+      <p class="text-xs text-orange-700">• Setiap opsi <b>salah</b> yang dipilih: <b>-1 poin</b></p>
+    </div>`;
+    ['A','B','C','D'].forEach(opt => {
+      const val = soal['opsi'+opt];
+      if (!val) return;
+      const arr = currentJawaban || [];
+      const checked = arr.includes(opt) ? 'checked' : '';
+      html += `<label class="block bg-gray-50 hover:bg-blue-50 p-3 rounded-lg mb-2 cursor-pointer transition">
+        <input type="checkbox" value="${opt}" ${checked} onchange="toggleKompleks(${idx},'${opt}')" class="mr-2"> 
+        <span class="font-bold">${opt}.</span> ${val}
+      </label>`;
+      if (soal['gambar'+opt]) {
+        html += `<div class="ml-8 mb-2"><img src="${soal['gambar'+opt]}" class="img-opsi"></div>`;
+      }
+    });
+  } else if (soal.tipe === 'pg_kategori') {
+    html += `<div class="bg-purple-50 border-l-4 border-purple-400 p-3 rounded mb-3">
+      <p class="text-sm text-purple-800 font-semibold">📋 Tentukan Benar atau Salah</p>
+      <p class="text-xs text-purple-700 mt-1">• Setiap pernyataan <b>benar</b>: <b>+1 poin</b></p>
+      <p class="text-xs text-purple-700">• Setiap pernyataan <b>salah</b>: <b>-1 poin</b></p>
+    </div>`;
+    html += `<div class="overflow-x-auto"><table class="tabel-bs text-sm">
+      <thead><tr><th class="text-left">Pernyataan</th><th class="text-center">Benar</th><th class="text-center">Salah</th></tr></thead><tbody>`;
+    const obj = currentJawaban || {};
+    soal.pernyataan.forEach((p, i) => {
+      const val = obj[i] || '';
+      html += `<tr>
+        <td>${i+1}. ${p.text}</td>
+        <td class="text-center"><input type="radio" name="kat${idx}_${i}" ${val==='B'?'checked':''} onchange="setKategori(${idx},${i},'B')"></td>
+        <td class="text-center"><input type="radio" name="kat${idx}_${i}" ${val==='S'?'checked':''} onchange="setKategori(${idx},${i},'S')"></td>
+      </tr>`;
+    });
+    html += `</tbody></table></div>`;
+  }
+  
+  container.innerHTML = html;
+}
+
+function renderNav() {
+  const nav = document.getElementById('soalNav');
+  nav.innerHTML = '';
+  currentQuiz.soal.forEach((_, i) => {
+    const answered = isAnswered(i);
+    const active = i === currentSoalIndex;
+    const cls = active ? 'aktif' : (answered ? 'dijawab' : 'belum');
+    nav.innerHTML += `<button onclick="goToSoal(${i})" class="soal-nav-btn ${cls}">${i+1}</button>`;
+  });
+}
+
+function isAnswered(idx) {
+  const j = jawabanSiswa[idx];
+  const soal = currentQuiz.soal[idx];
+  if (!j) return false;
+  if (soal.tipe === 'pg_kategori') return Object.keys(j).length === soal.pernyataan.length;
+  if (soal.tipe === 'pg_kompleks') return j.length === 2;
+  return true;
+}
+
+function setJawaban(idx, val) { jawabanSiswa[idx] = val; renderNav(); }
+function toggleKompleks(idx, val) {
+  let arr = jawabanSiswa[idx] || [];
+  if (arr.includes(val)) arr = arr.filter(x => x !== val);
+  else {
+    if (arr.length >= 2) { showToast('Maksimal 2 jawaban!', 'error'); return; }
+    arr.push(val);
+  }
+  jawabanSiswa[idx] = arr;
+  renderNav();
+  renderSoal();
+}
+function setKategori(idx, i, val) {
+  if (!jawabanSiswa[idx]) jawabanSiswa[idx] = {};
+  jawabanSiswa[idx][i] = val;
+  renderNav();
+}
+
+function prevSoal() { if (currentSoalIndex > 0) { currentSoalIndex--; renderSoal(); renderNav(); } }
+function nextSoal() { if (currentSoalIndex < currentQuiz.soal.length - 1) { currentSoalIndex++; renderSoal(); renderNav(); } }
+function goToSoal(i) { currentSoalIndex = i; renderSoal(); renderNav(); }
+
+function confirmSubmit() {
+  const answered = Object.keys(jawabanSiswa).filter(k => isAnswered(parseInt(k))).length;
+  document.getElementById('confirmMsg').textContent = `Kamu telah menjawab ${answered} dari ${currentQuiz.soal.length} soal.`;
+  document.getElementById('modalConfirm').classList.add('active');
+}
+
+// ============ FUNGSI HITUNG SKOR +1/-1 ============
+function hitungSkorPerOpsi(soal, jawaban) {
+  const result = { skorDidapat: 0, skorMaks: 0, skorMin: 0, detail: [], benar: false, info: '' };
+  
+  if (soal.tipe === 'pg') {
+    const benar = jawaban === soal.jawaban;
+    result.skorDidapat = benar ? soal.skor : 0;
+    result.skorMaks = soal.skor;
+    result.skorMin = 0;
+    result.benar = benar;
+    result.detail = [{ opsi: jawaban || '-', benar: benar, skor: result.skorDidapat, status: benar ? '✅ Benar' : '❌ Salah (Jawaban benar: ' + soal.jawaban + ')' }];
+    result.info = benar ? 'Jawaban benar!' : 'Jawaban salah';
+  }
+  else if (soal.tipe === 'pg_kompleks') {
+    const jawabanBenar = soal.jawaban.split(',').map(x => x.trim());
+    const jawabanSiswa = jawaban || [];
+    let totalSkor = 0;
+    const opsiDetail = [];
+    
+    ['A','B','C','D'].forEach(opt => {
+      if (!soal['opsi'+opt]) return;
+      const isBenar = jawabanBenar.includes(opt);
+      const isDipilih = jawabanSiswa.includes(opt);
+      
+      let status, skorOpsi;
+      if (isDipilih && isBenar) { status = '✅ Benar (dipilih) → +1'; skorOpsi = 1; }
+      else if (isDipilih && !isBenar) { status = '❌ Salah (dipilih) → -1'; skorOpsi = -1; }
+      else if (!isDipilih && isBenar) { status = '⚠️ Tidak dipilih (seharusnya dipilih) → 0'; skorOpsi = 0; }
+      else { status = '⬜ Tidak dipilih (benar tidak dipilih) → 0'; skorOpsi = 0; }
+      
+      totalSkor += skorOpsi;
+      opsiDetail.push({ opsi: opt, teks: soal['opsi'+opt], status: status, skor: skorOpsi, benar: isDipilih ? isBenar : null });
+    });
+    
+    result.skorDidapat = totalSkor;
+    result.skorMaks = 2;
+    result.skorMin = -2;
+    result.benar = totalSkor === 2;
+    result.detail = opsiDetail;
+    const benarDipilih = jawabanSiswa.filter(x => jawabanBenar.includes(x)).length;
+    const salahDipilih = jawabanSiswa.filter(x => !jawabanBenar.includes(x)).length;
+    result.info = `${benarDipilih} benar (+${benarDipilih}), ${salahDipilih} salah (-${salahDipilih}) = ${totalSkor}`;
+  }
+  else if (soal.tipe === 'pg_kategori') {
+    const obj = jawaban || {};
+    let totalSkor = 0;
+    const pernyataanDetail = [];
+    
+    soal.pernyataan.forEach((p, i) => {
+      const jawabanSiswa = obj[i] || '-';
+      const isBenar = jawabanSiswa === p.answer;
+      
+      let status, skorPernyataan;
+      if (jawabanSiswa === '-') { status = '⚠️ Tidak dijawab → 0'; skorPernyataan = 0; }
+      else if (isBenar) { status = '✅ Benar → +1'; skorPernyataan = 1; }
+      else { status = '❌ Salah → -1'; skorPernyataan = -1; }
+      
+      totalSkor += skorPernyataan;
+      pernyataanDetail.push({ nomor: i + 1, teks: p.text, jawabanSiswa: jawabanSiswa, jawabanBenar: p.answer, status: status, skor: skorPernyataan, benar: isBenar });
+    });
+    
+    result.skorDidapat = totalSkor;
+    result.skorMaks = soal.pernyataan.length;
+    result.skorMin = -soal.pernyataan.length;
+    result.benar = totalSkor === soal.pernyataan.length;
+    result.detail = pernyataanDetail;
+    const benarCount = pernyataanDetail.filter(p => p.skor === 1).length;
+    const salahCount = pernyataanDetail.filter(p => p.skor === -1).length;
+    const kosongCount = pernyataanDetail.filter(p => p.skor === 0).length;
+    result.info = `${benarCount} benar (+${benarCount}), ${salahCount} salah (-${salahCount})${kosongCount > 0 ? ', ' + kosongCount + ' kosong (0)' : ''} = ${totalSkor}`;
+  }
+  
+  return result;
+}
+
+function submitQuiz() {
+  closeModal('modalConfirm');
+  clearInterval(timerInterval);
+  
+  let skor = 0, bobotMaks = 0, bobotMin = 0;
+  const detail = [];
+  
+  currentQuiz.soal.forEach((soal, i) => {
+    const j = jawabanSiswa[i];
+    const hasilHitung = hitungSkorPerOpsi(soal, j);
+    
+    skor += hasilHitung.skorDidapat;
+    bobotMaks += hasilHitung.skorMaks;
+    bobotMin += hasilHitung.skorMin;
+    
+    detail.push({
+      nomor: i + 1, tipe: soal.tipe, pertanyaan: soal.pertanyaan,
+      jawaban: j, skorDidapat: hasilHitung.skorDidapat,
+      skorMaks: hasilHitung.skorMaks, skorMin: hasilHitung.skorMin,
+      benar: hasilHitung.benar, info: hasilHitung.info || '',
+      detailOpsi: hasilHitung.detail,
+      gambarPertanyaan: soal.gambarPertanyaan || '',
+      gambarA: soal.gambarA || '', gambarB: soal.gambarB || '',
+      gambarC: soal.gambarC || '', gambarD: soal.gambarD || ''
+    });
+  });
+  
+  const hasil = DB.get('hasil') || [];
+  hasil.push({
+    timestamp: new Date().toISOString(), nisn: currentUser.nisn, nama: currentUser.nama,
+    kategori: currentQuiz.kategori, paket: currentQuiz.paket,
+    skor, totalSoal: currentQuiz.soal.length, bobotMaks, bobotMin, detail
+  });
+  DB.set('hasil', hasil);
+  
+  const skorEl = document.getElementById('hasilSkor');
+  skorEl.textContent = skor;
+  skorEl.className = 'text-5xl font-extrabold ' + (skor > 0 ? 'text-green-300' : skor < 0 ? 'text-red-300' : 'text-yellow-300');
+  document.getElementById('hasilMaks').textContent = bobotMaks + ' (min: ' + bobotMin + ')';
+  
+  let detailHtml = '<h4 class="font-bold text-blue-800 mb-3">📋 Ringkasan Jawaban (Sistem +1/-1):</h4>';
+  detailHtml += `<div class="bg-blue-100 p-3 rounded-lg mb-3 text-sm">
+    <p><b>Total Skor:</b> ${formatSkor(skor)} dari maksimal ${bobotMaks} (minimal ${bobotMin})</p>
+  </div>`;
+  
+  detail.forEach(d => {
+    const borderClass = d.skorDidapat > 0 ? 'border-green-500 bg-green-50' : 
+                        d.skorDidapat < 0 ? 'border-red-500 bg-red-50' : 
+                        'border-yellow-500 bg-yellow-50';
+    detailHtml += `<div class="border-l-4 ${borderClass} p-3 rounded-lg mb-2">`;
+    detailHtml += `<div class="flex justify-between items-start mb-2 flex-wrap gap-2">`;
+    detailHtml += `<div><b class="text-blue-800">Soal ${d.nomor}</b> <span class="badge bg-blue-100 text-blue-700">${d.tipe === 'pg' ? 'PG Biasa' : d.tipe === 'pg_kompleks' ? 'PG Kompleks' : 'PG Kategori'}</span></div>`;
+    detailHtml += `<div class="text-right font-bold text-lg">${formatSkor(d.skorDidapat)}<span class="text-xs text-gray-500">/${d.skorMaks}</span></div>`;
+    detailHtml += `</div>`;
+    
+    // Tampilkan gambar pertanyaan di hasil
+    if (d.gambarPertanyaan) {
+      detailHtml += `<div class="text-center my-2"><img src="${d.gambarPertanyaan}" class="img-soal"></div>`;
+    }
+    
+    detailHtml += `<p class="text-sm text-gray-700 mb-2">${d.pertanyaan}</p>`;
+    if (d.info) detailHtml += `<p class="text-xs text-gray-700 mb-2 bg-white p-2 rounded">ℹ️ ${d.info}</p>`;
+    
+    if (d.detailOpsi && d.detailOpsi.length > 0) {
+      detailHtml += `<div class="space-y-1">`;
+      d.detailOpsi.forEach(o => {
+        let bgColor = 'bg-gray-100';
+        let icon = 'ℹ️';
+        if (o.skor > 0) { bgColor = 'bg-green-100'; icon = '✅'; }
+        else if (o.skor < 0) { bgColor = 'bg-red-100'; icon = ''; }
+        else if (o.skor === 0 && o.status && o.status.includes('Tidak')) { bgColor = 'bg-yellow-50'; icon = '⚠️'; }
+        
+        detailHtml += `<div class="${bgColor} p-2 rounded text-xs">`;
+        detailHtml += `<span class="font-bold">${icon} ${o.status}</span>`;
+        if (o.teks) detailHtml += `<br><span class="text-gray-600 ml-4">${o.teks}</span>`;
+        // Tampilkan gambar opsi di hasil
+        const gambarOpsi = d['gambar' + o.opsi];
+        if (gambarOpsi) detailHtml += `<br><img src="${gambarOpsi}" class="img-opsi mt-1">`;
+        detailHtml += `</div>`;
+      });
+      detailHtml += `</div>`;
+    }
+    detailHtml += `</div>`;
+  });
+  document.getElementById('hasilDetail').innerHTML = detailHtml;
+  
+  showView('viewHasil');
+  showToast('Try Out selesai! Skor: ' + skor, skor >= 0 ? 'success' : 'error');
+}
+
+function backToDashboard() {
+  currentQuiz = null;
+  showView('viewDashboard');
+  loadDashboard();
+}
+
+// ============ ADMIN ============
+function showAdminTab(tab) {
+  document.querySelectorAll('.admin-content').forEach(c => c.classList.add('hidden'));
+  document.querySelectorAll('.admin-tab').forEach(b => { b.classList.remove('bg-blue-500','text-white'); b.classList.add('bg-gray-200'); });
+  document.getElementById('admin' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.remove('hidden');
+  event.target.classList.remove('bg-gray-200');
+  event.target.classList.add('bg-blue-500','text-white');
+  
+  if (tab === 'dashboard') loadAdminDashboard();
+  if (tab === 'users') loadUsers();
+  if (tab === 'soal') loadSoalAdmin();
+  if (tab === 'hasil') loadHasilAdmin();
+}
+
+function loadAdminDashboard() {
+  const users = (DB.get('users') || []).filter(u => u.role !== 'admin');
+  const soal = DB.get('soal') || [];
+  const hasil = DB.get('hasil') || [];
+  document.getElementById('statUser').textContent = users.length;
+  document.getElementById('statSoal').textContent = soal.length;
+  document.getElementById('statHasil').textContent = hasil.length;
+}
+
+function loadUsers() {
+  const users = (DB.get('users') || []).filter(u => u.role !== 'admin');
+  const tbody = document.getElementById('userTable');
+  tbody.innerHTML = '';
+  users.forEach(u => {
+    tbody.innerHTML += `<tr class="border-b hover:bg-gray-50">
+      <td class="p-2">${u.nisn}</td><td class="p-2">${u.nama}</td>
+      <td class="p-2">${u.sekolah}</td><td class="p-2">${u.kelas}</td>
+      <td class="p-2">
+        <button onclick="editUser('${u.nisn}')" class="bg-yellow-400 hover:bg-yellow-500 px-2 py-1 rounded text-xs transition">✏️</button>
+        <button onclick="hapusUser('${u.nisn}')" class="bg-red-400 hover:bg-red-500 px-2 py-1 rounded text-xs transition">🗑️</button>
+      </td></tr>`;
+  });
+}
+
+function openUserModal(nisn = null) {
+  document.getElementById('userModalTitle').textContent = nisn ? 'Edit User' : 'Tambah User';
+  ['uNisn','uPass','uNama','uSekolah','uKelas'].forEach(id => document.getElementById(id).value = '');
+  if (nisn) {
+    const users = DB.get('users') || [];
+    const u = users.find(x => x.nisn === nisn);
+    if (u) {
+      document.getElementById('uNisn').value = u.nisn;
+      document.getElementById('uPass').value = u.password;
+      document.getElementById('uNama').value = u.nama;
+      document.getElementById('uSekolah').value = u.sekolah;
+      document.getElementById('uKelas').value = u.kelas;
+    }
+  }
+  document.getElementById('modalUser').classList.add('active');
+}
+
+function editUser(nisn) { openUserModal(nisn); }
+
+function saveUser() {
+  const data = {
+    nisn: document.getElementById('uNisn').value.trim(),
+    password: document.getElementById('uPass').value.trim(),
+    nama: document.getElementById('uNama').value.trim(),
+    sekolah: document.getElementById('uSekolah').value.trim(),
+    kelas: document.getElementById('uKelas').value.trim(),
+    role: 'siswa'
+  };
+  if (!data.nisn || !data.password || !data.nama) { showToast('Lengkapi data!', 'error'); return; }
+  
+  const users = DB.get('users') || [];
+  const idx = users.findIndex(x => x.nisn === data.nisn);
+  if (idx >= 0) { users[idx] = data; showToast('User berhasil diupdate', 'success'); }
+  else { users.push(data); showToast('User berhasil ditambahkan', 'success'); }
+  DB.set('users', users);
+  closeModal('modalUser');
+  loadUsers();
+}
+
+function hapusUser(nisn) {
+  if (!confirm('Hapus user ' + nisn + '?')) return;
+  const users = (DB.get('users') || []).filter(u => u.nisn !== nisn);
+  DB.set('users', users);
+  loadUsers();
+  showToast('User dihapus', 'success');
+}
+
+// ============ ADMIN SOAL ============
+function loadSoalAdmin() {
+  const kat = document.getElementById('filterKat').value;
+  const paket = document.getElementById('filterPaket').value;
+  let soal = DB.get('soal') || [];
+  if (kat) soal = soal.filter(s => s.kategori === kat);
+  if (paket) soal = soal.filter(s => s.paket === paket);
+  
+  const tbody = document.getElementById('soalTable');
+  tbody.innerHTML = '';
+  soal.forEach((s, i) => {
+    const tipeLabel = { pg: 'PG Biasa', pg_kompleks: 'PG Kompleks', pg_kategori: 'PG Kategori' }[s.tipe];
+    const shortQ = s.pertanyaan.length > 30 ? s.pertanyaan.substring(0,30) + '...' : s.pertanyaan;
+    
+    let skorInfo = '';
+    if (s.tipe === 'pg') skorInfo = `0 s/d ${s.skor}`;
+    else if (s.tipe === 'pg_kompleks') skorInfo = `-2 s/d +2`;
+    else if (s.tipe === 'pg_kategori') skorInfo = `-${s.pernyataan.length} s/d +${s.pernyataan.length}`;
+    
+    // Thumbnail gambar
+    const hasGambar = s.gambarPertanyaan || s.gambarA || s.gambarB || s.gambarC || s.gambarD;
+    const imgThumbnail = hasGambar ? `<img src="${s.gambarPertanyaan || s.gambarA || s.gambarB || s.gambarC || s.gambarD}" class="img-thumbnail" title="Soal dengan gambar">` : '<span class="text-gray-400">-</span>';
+    
+    tbody.innerHTML += `<tr class="border-b hover:bg-gray-50">
+      <td class="p-2">${i+1}</td><td class="p-2">${s.kategori}</td><td class="p-2">${s.paket}</td>
+      <td class="p-2"><span class="badge bg-blue-100 text-blue-700">${tipeLabel}</span></td>
+      <td class="p-2">${shortQ}</td>
+      <td class="p-2 text-center">${imgThumbnail}</td>
+      <td class="p-2 text-xs font-bold">${skorInfo}</td>
+      <td class="p-2">
+        <button onclick="editSoal('${s.id}')" class="bg-yellow-400 hover:bg-yellow-500 px-2 py-1 rounded text-xs transition">✏️</button>
+        <button onclick="hapusSoal('${s.id}')" class="bg-red-400 hover:bg-red-500 px-2 py-1 rounded text-xs transition">🗑️</button>
+      </td></tr>`;
+  });
+}
+
+function openSoalModal(id = null) {
+  editingSoalId = id;
+  document.getElementById('soalModalTitle').textContent = id ? 'Edit Soal' : 'Tambah Soal';
+  ['sPertanyaan','sA','sB','sC','sD','sJawaban','sPernyataan'].forEach(x => document.getElementById(x).value = '');
+  document.getElementById('sSkor').value = 2;
+  
+  // Reset gambar
+  gambarSoal = { pertanyaan: '', A: '', B: '', C: '', D: '' };
+  hapusGambarPertanyaan();
+  ['A','B','C','D'].forEach(opt => {
+    document.getElementById('preview' + opt).classList.add('hidden');
+    document.getElementById('file' + opt).value = '';
+  });
+  
+  if (id) {
+    const soal = (DB.get('soal') || []).find(x => x.id === id);
+    if (soal) {
+      document.getElementById('sKategori').value = soal.kategori;
+      document.getElementById('sPaket').value = soal.paket;
+      document.getElementById('sTipe').value = soal.tipe;
+      document.getElementById('sPertanyaan').value = soal.pertanyaan;
+      document.getElementById('sA').value = soal.opsiA;
+      document.getElementById('sB').value = soal.opsiB;
+      document.getElementById('sC').value = soal.opsiC;
+      document.getElementById('sD').value = soal.opsiD;
+      document.getElementById('sJawaban').value = soal.jawaban;
+      document.getElementById('sSkor').value = soal.skor;
+      if (soal.tipe === 'pg_kategori') {
+        document.getElementById('sPernyataan').value = soal.pernyataan.map(p => p.text + '|' + p.answer).join('\n');
+      }
+      
+      // Load gambar yang sudah ada
+      if (soal.gambarPertanyaan) {
+        gambarSoal.pertanyaan = soal.gambarPertanyaan;
+        const preview = document.getElementById('previewPertanyaan');
+        preview.innerHTML = `
+          <img src="${soal.gambarPertanyaan}" class="img-preview">
+          <button type="button" onclick="hapusGambarPertanyaan(event)" class="btn-hapus-img mt-2">🗑️ Hapus Gambar</button>
+        `;
+        document.getElementById('uploadAreaPertanyaan').classList.add('has-image');
+      }
+      ['A','B','C','D'].forEach(opt => {
+        if (soal['gambar'+opt]) {
+          gambarSoal[opt] = soal['gambar'+opt];
+          const imgPreview = document.getElementById('imgPreview' + opt);
+          imgPreview.src = soal['gambar'+opt];
+          document.getElementById('preview' + opt).classList.remove('hidden');
+        }
+      });
+    }
+  }
+  document.getElementById('modalSoal').classList.add('active');
+  toggleSoalForm();
+}
+
+function editSoal(id) { openSoalModal(id); }
+
+function toggleSoalForm() {
+  const tipe = document.getElementById('sTipe').value;
+  document.getElementById('formPG').classList.toggle('hidden', tipe === 'pg_kategori');
+  document.getElementById('formKategori').classList.toggle('hidden', tipe !== 'pg_kategori');
+  
+  const skorInput = document.getElementById('sSkor');
+  if (tipe === 'pg') skorInput.value = 1;
+  else if (tipe === 'pg_kompleks') skorInput.value = 2;
+  else if (tipe === 'pg_kategori') skorInput.value = 3;
+}
+
+function saveSoal() {
+  const tipe = document.getElementById('sTipe').value;
+  const data = {
+    id: editingSoalId || ('SOAL_' + Date.now()),
+    kategori: document.getElementById('sKategori').value,
+    paket: document.getElementById('sPaket').value,
+    tipe,
+    pertanyaan: document.getElementById('sPertanyaan').value.trim(),
+    skor: parseInt(document.getElementById('sSkor').value) || 1,
+    // Simpan gambar
+    gambarPertanyaan: gambarSoal.pertanyaan || '',
+    gambarA: gambarSoal.A || '',
+    gambarB: gambarSoal.B || '',
+    gambarC: gambarSoal.C || '',
+    gambarD: gambarSoal.D || ''
+  };
+  
+  if (tipe === 'pg_kategori') {
+    const lines = document.getElementById('sPernyataan').value.trim().split('\n').filter(x => x);
+    data.pernyataan = lines.map(l => {
+      const [text, ans] = l.split('|');
+      return { text: text.trim(), answer: (ans || 'B').trim().toUpperCase() };
+    });
+    data.opsiA = data.opsiB = data.opsiC = data.opsiD = '';
+    data.jawaban = '';
+  } else {
+    data.opsiA = document.getElementById('sA').value.trim();
+    data.opsiB = document.getElementById('sB').value.trim();
+    data.opsiC = document.getElementById('sC').value.trim();
+    data.opsiD = document.getElementById('sD').value.trim();
+    data.jawaban = document.getElementById('sJawaban').value.trim();
+    data.pernyataan = [];
+  }
+  
+  if (!data.pertanyaan && !data.gambarPertanyaan) { showToast('Pertanyaan atau gambar wajib diisi!', 'error'); return; }
+  
+  const soal = DB.get('soal') || [];
+  const idx = soal.findIndex(x => x.id === data.id);
+  if (idx >= 0) { soal[idx] = data; showToast('Soal berhasil diupdate', 'success'); }
+  else { soal.push(data); showToast('Soal berhasil ditambahkan', 'success'); }
+  
+  const saved = DB.set('soal', soal);
+  if (saved) {
+    closeModal('modalSoal');
+    loadSoalAdmin();
+  }
+}
+
+function hapusSoal(id) {
+  if (!confirm('Hapus soal ini?')) return;
+  const soal = (DB.get('soal') || []).filter(s => s.id !== id);
+  DB.set('soal', soal);
+  loadSoalAdmin();
+  showToast('Soal dihapus', 'success');
+}
+
+// ============ ADMIN HASIL ============
+function loadHasilAdmin() {
+  const hasil = DB.get('hasil') || [];
+  const tbody = document.getElementById('hasilTable');
+  tbody.innerHTML = '';
+  hasil.forEach(h => {
+    const tgl = new Date(h.timestamp).toLocaleString('id-ID');
+    const skorClass = h.skor >= 0 ? 'text-green-700' : 'text-red-700';
+    tbody.innerHTML += `<tr class="border-b hover:bg-gray-50">
+      <td class="p-2 text-xs">${tgl}</td><td class="p-2">${h.nisn}</td><td class="p-2">${h.nama}</td>
+      <td class="p-2">${h.kategori}</td><td class="p-2">${h.paket}</td>
+      <td class="p-2 font-bold ${skorClass}">${h.skor}/${h.bobotMaks}</td>
+      <td class="p-2"><button onclick='showDetailHasil(${JSON.stringify(h.detail).replace(/'/g, "\\'")})' class="bg-blue-400 hover:bg-blue-500 px-2 py-1 rounded text-xs transition">👁️ Detail</button></td>
+    </tr>`;
+  });
+}
+
+function showDetailHasil(detail) {
+  let html = '<div class="space-y-3">';
+  detail.forEach(d => {
+    const borderClass = d.skorDidapat > 0 ? 'border-green-500 bg-green-50' : 
+                        d.skorDidapat < 0 ? 'border-red-500 bg-red-50' : 
+                        'border-yellow-500 bg-yellow-50';
+    html += `<div class="border-l-4 ${borderClass} p-3 rounded">`;
+    html += `<div class="flex justify-between items-start mb-1 flex-wrap gap-2">`;
+    html += `<div><b>Soal ${d.nomor}</b> <span class="badge bg-blue-100 text-blue-700">${d.tipe === 'pg' ? 'PG Biasa' : d.tipe === 'pg_kompleks' ? 'PG Kompleks' : 'PG Kategori'}</span></div>`;
+    html += `<div class="font-bold text-lg">${formatSkor(d.skorDidapat)}<span class="text-xs text-gray-500">/${d.skorMaks}</span></div>`;
+    html += `</div>`;
+    
+    if (d.gambarPertanyaan) html += `<div class="text-center my-2"><img src="${d.gambarPertanyaan}" class="img-soal"></div>`;
+    html += `<p class="text-sm text-gray-700 mb-2">${d.pertanyaan}</p>`;
+    if (d.info) html += `<p class="text-xs text-gray-700 mb-2 bg-white p-2 rounded">ℹ️ ${d.info}</p>`;
+    
+    if (d.detailOpsi && d.detailOpsi.length > 0) {
+      html += `<div class="space-y-1">`;
+      d.detailOpsi.forEach(o => {
+        let bgColor = 'bg-gray-100';
+        let icon = 'ℹ️';
+        if (o.skor > 0) { bgColor = 'bg-green-100'; icon = '✅'; }
+        else if (o.skor < 0) { bgColor = 'bg-red-100'; icon = '❌'; }
+        else if (o.skor === 0 && o.status && o.status.includes('Tidak')) { bgColor = 'bg-yellow-50'; icon = '️'; }
+        
+        html += `<div class="${bgColor} p-2 rounded text-xs">`;
+        html += `<span class="font-bold">${icon} ${o.status}</span>`;
+        if (o.teks) html += `<br><span class="text-gray-600 ml-4">${o.teks}</span>`;
+        const gambarOpsi = d['gambar' + o.opsi];
+        if (gambarOpsi) html += `<br><img src="${gambarOpsi}" class="img-opsi mt-1">`;
+        html += `</div>`;
+      });
+      html += `</div>`;
+    }
+    html += `</div>`;
+  });
+  html += '</div>';
+  document.getElementById('detailHasilContent').innerHTML = html;
+  document.getElementById('modalDetailHasil').classList.add('active');
+}
+
+// ============ ENTER KEY SUPPORT ============
+document.getElementById('loginPass').addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') doLogin();
+});
+</script>
+
+</body>
+</html>
